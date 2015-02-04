@@ -6,6 +6,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Lee Jensen"]
   gem.email         = ["lee@bigcartel.com"]
   gem.description   = %q(A simple wrapper for standardizing middleman deploys to s3 and fastly)
+  gem.summary       = %q(Uses s3_sync to push site files to s3, issues purges to fastly after deploy, and reads configuration data from chef)
   gem.license       = "BSD"
 
   gem.files         = `git ls-files`.split($/)

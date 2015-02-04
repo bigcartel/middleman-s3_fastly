@@ -1,3 +1,5 @@
+require 'middleman-s3_sync'
+
 class Middleman::S3Fastly < Middleman::Extension
   option :api_key, nil, 'Fastly API Key'
   option :service_id, nil, 'Fastly Service ID'
@@ -21,12 +23,12 @@ class Middleman::S3Fastly < Middleman::Extension
     config = Bundler.with_clean_env {
       YAML.load(`knife data bag show static-sites #{deploy_env} --secret-file .chef-keys/#{deploy_env}`)
     }
-    puts("No deploy configuration for #{deploy_env}") and exit 1 unless config
+    puts("No deploy configuration for #{deploy_env}") || exit(1) unless config
 
     sync_config = config.delete('s3-sync')
     fastly_config = config.delete('fastly')
     fastly_config[:hostname] = config['repos'][repo_name]
-    puts("Repo #{repo_name} is not configured to deploy to #{deploy_env}") and exit 1 unless fastly_config[:hostname]
+    puts("Repo #{repo_name} is not configured to deploy to #{deploy_env}") || exit(1) unless fastly_config[:hostname]
 
     app.activate :s3_sync, sync_config do |s3_sync|
       s3_sync.prefer_gzip = false
