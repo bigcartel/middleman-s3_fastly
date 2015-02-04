@@ -12,7 +12,7 @@ class Middleman::S3Fastly < Middleman::Extension
     # variable to access the options
     my_options = options
     app.after_s3_sync { 
-      puts 'Issuing Fastly Purge'.rjust(12).light_green
+      puts ANSI.green{ 'Issuing Fastly Purge'.rjust(12) }
       system(%Q!curl -X POST -H "Accept: application/json" -H "Fastly-Key: #{my_options.api_key}" https://api.fastly.com/service/#{my_options.service_id}/purge/#{my_options.hostname}+text-html!)
     }
   end
