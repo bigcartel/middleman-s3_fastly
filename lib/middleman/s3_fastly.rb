@@ -21,7 +21,7 @@ class Middleman::S3Fastly < Middleman::Extension
     return unless deploy_env
 
     config = Bundler.with_clean_env {
-      YAML.load(`knife data bag show static-sites #{deploy_env} --secret-file .chef-keys/#{deploy_env}`)
+      YAML.load(`knife data bag show static-sites #{deploy_env} --secret-file #{secret_file(deploy_env)}`)
     }
     puts("No deploy configuration for #{deploy_env}") || exit(1) unless config
 
@@ -44,6 +44,17 @@ class Middleman::S3Fastly < Middleman::Extension
     app.caching_policy 'text/html', s_maxage: a_year
 
     app.activate(:s3_fastly, fastly_config.symbolize_keys) if fastly_config
+  end
+
+  def self.secret_file(env)
+    try = %w( ~/.chef-keys/static-sites .chef-keys )
+    found = try.collect { |dir|
+      keyfile = File.expand_path(File.join(dir, env))
+      keyfile if File.exists?(keyfile)
+    }.compact
+
+    puts("Unable to find secret key for #{env} in search folders: #{try.join(', ')}") || exit(1) if found.empty?
+    found.first
   end
 
   def self.repo_name
