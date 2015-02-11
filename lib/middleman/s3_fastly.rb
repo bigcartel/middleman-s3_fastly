@@ -4,6 +4,7 @@ class Middleman::S3Fastly < Middleman::Extension
   option :api_key, nil, 'Fastly API Key'
   option :service_id, nil, 'Fastly Service ID'
   option :hostname, nil, 'Service Hostname'
+  option :purge_paths, nil, 'Paths to purge'
 
   def initialize(app, options_hash={}, &block)
     super
@@ -12,12 +13,22 @@ class Middleman::S3Fastly < Middleman::Extension
     # variable to access the options
     my_options = options
     app.after_s3_sync { 
-      puts ANSI.green{ 'Issuing Fastly Purge'.rjust(12) }
-      system(%Q!curl -X POST -H "Accept: application/json" -H "Fastly-Key: #{my_options.api_key}" https://api.fastly.com/service/#{my_options.service_id}/purge/#{my_options.hostname}+text-html!)
+      puts ANSI.green{ 'Issuing Fastly Purges'.rjust(12) }
+
+      key_purges = %w( text-html text-xml text-plain )
+      key_purges.each { |key|
+        $stdout.write "  KEY #{key}: "
+        system(%Q!curl -X POST -H "Accept: application/json" -H "Fastly-Key: #{my_options.api_key}" https://api.fastly.com/service/#{my_options.service_id}/purge/#{my_options.hostname}+#{key}!)
+      }
+
+      [my_options[:purge_paths]].flatten.compact.each { |url|
+        $stdout.write "  URL #{url}: "
+        system("curl -X PURGE https://#{my_options.hostname}#{url}")
+      }
     }
   end
 
-  def self.configure(app, deploy_env)
+  def self.configure(app, deploy_env, options={})
     return unless deploy_env
 
     config = Bundler.with_clean_env {
@@ -43,6 +54,7 @@ class Middleman::S3Fastly < Middleman::Extension
     app.default_caching_policy public: true, max_age: a_year
     app.caching_policy 'text/html', s_maxage: a_year
 
+    fastly_config.merge! options
     app.activate(:s3_fastly, fastly_config.symbolize_keys) if fastly_config
   end
 
