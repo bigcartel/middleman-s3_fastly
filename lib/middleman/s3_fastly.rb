@@ -12,7 +12,7 @@ class Middleman::S3Fastly < Middleman::Extension
     # Block below is run with a different binding so we need to stash a local
     # variable to access the options
     my_options = options
-    app.after_s3_sync { 
+    app.after_s3_sync {
       puts ANSI.green{ 'Issuing Fastly Purges'.rjust(12) }
 
       key_purges = %w( text-html text-xml text-plain )
@@ -51,8 +51,20 @@ class Middleman::S3Fastly < Middleman::Extension
     end
 
     a_year = 60 * 60 * 24 * 365
-    app.default_caching_policy public: true, max_age: a_year
-    app.caching_policy 'text/html', s_maxage: a_year
+
+    default_caching_policy = options.delete(:default_caching_policy) {
+      { public: true, max_age: a_year }
+    }
+
+    caching_policies = options.delete(:caching_policies) {
+      [{ 'text/html' => { s_maxage: a_year }}]
+    }
+
+    app.default_caching_policy default_caching_policy
+
+    caching_policies.each do |content_type, policy|
+      app.caching_policy content_type, policy
+    end
 
     fastly_config.merge! options
     app.activate(:s3_fastly, fastly_config.symbolize_keys) if fastly_config
