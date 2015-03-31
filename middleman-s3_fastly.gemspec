@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = "middleman-s3_fastly"
-  gem.version       = "0.1.0"
+  gem.version       = "0.1.1"
   gem.authors       = ["Lee Jensen"]
   gem.email         = ["lee@bigcartel.com"]
   gem.description   = %q(A simple wrapper for standardizing middleman deploys to s3 and fastly)

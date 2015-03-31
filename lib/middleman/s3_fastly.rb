@@ -57,7 +57,7 @@ class Middleman::S3Fastly < Middleman::Extension
     }
 
     caching_policies = options.delete(:caching_policies) {
-      [{ 'text/html' => { s_maxage: a_year }}]
+      { 'text/html' => { s_maxage: a_year }}
     }
 
     app.default_caching_policy default_caching_policy
