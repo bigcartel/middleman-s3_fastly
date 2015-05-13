@@ -84,7 +84,7 @@ class Middleman::S3Fastly < Middleman::Extension
   def self.repo_name
     @repo_name ||= begin
       remote = `git config --get remote.origin.url`.chomp
-      remote.sub(/^git@github\.com:(.+?)\.git$/, '\1')
+      remote.sub(/^(?:https:\/\/|git@)github\.com(?::|\/)(.+?)\.git$/, '\1')
     end
   end
 end
