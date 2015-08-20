@@ -4,6 +4,7 @@ class Middleman::S3Fastly < Middleman::Extension
   option :api_key, nil, 'Fastly API Key'
   option :service_id, nil, 'Fastly Service ID'
   option :hostname, nil, 'Service Hostname'
+  option :scheme, 'https', 'Service Scheme'
   option :purge_paths, nil, 'Paths to purge'
 
   def initialize(app, options_hash={}, &block)
@@ -23,7 +24,7 @@ class Middleman::S3Fastly < Middleman::Extension
 
       [my_options[:purge_paths]].flatten.compact.each { |url|
         $stdout.write "  URL #{url}: "
-        system("curl -X PURGE https://#{my_options.hostname}#{url}")
+        system("curl -X PURGE #{my_options.scheme}://#{my_options.hostname}#{url}")
       }
     }
   end
