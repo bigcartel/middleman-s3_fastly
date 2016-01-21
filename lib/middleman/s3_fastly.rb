@@ -32,19 +32,21 @@ class Middleman::S3Fastly < Middleman::Extension
   def self.configure(app, deploy_env, options={})
     return unless deploy_env
 
-    config = Bundler.with_clean_env {
-      YAML.load(`knife data bag show static-sites #{deploy_env} --secret-file #{secret_file(deploy_env)}`)
+    fastly_config = {
+      api_key: fetch_env('FASTLY_KEY'),
+      service_id: fetch_env('FASTLY_ID'),
+      hostname: fetch_env('HOSTNAME')
     }
-    puts("No deploy configuration for #{deploy_env}") || exit(1) unless config
 
-    sync_config = config.delete('s3-sync')
-    fastly_config = config.delete('fastly')
-    fastly_config[:hostname] = config['repos'][repo_name]
-    puts("Repo #{repo_name} is not configured to deploy to #{deploy_env}") || exit(1) unless fastly_config[:hostname]
+    sync_config = {
+      aws_access_key_id: fetch_env('AWS_ACCESS_KEY_ID'),
+      aws_secret_access_key: fetch_env('AWS_SECRET_ACCESS_KEY')
+    }
 
     app.activate :s3_sync, sync_config do |s3_sync|
       s3_sync.prefer_gzip = false
       s3_sync.after_build = true
+
       s3_sync.bucket = fastly_config[:hostname].gsub('.', '-')
       sync_config.each_pair do |key, value|
         s3_sync.send "#{key}=", value
@@ -68,7 +70,7 @@ class Middleman::S3Fastly < Middleman::Extension
     end
 
     fastly_config.merge! options
-    app.activate(:s3_fastly, fastly_config.symbolize_keys) if fastly_config
+    app.activate(:s3_fastly, fastly_config.symbolize_keys)
   end
 
   def self.secret_file(env)
@@ -87,6 +89,10 @@ class Middleman::S3Fastly < Middleman::Extension
       remote = `git config --get remote.origin.url`.chomp
       remote.sub(/^(?:https:\/\/|git@)github\.com(?::|\/)(.+?)\.git$/, '\1')
     end
+  end
+
+  def self.fetch_env(key)
+    ENV[key] || puts("Missing required environment variable #{key}") || exit(1)
   end
 end
 
