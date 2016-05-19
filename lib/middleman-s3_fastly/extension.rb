@@ -6,14 +6,14 @@ class Middleman::S3Fastly < ::Middleman::Extension
   option :s3_caching_policies, {}
   option :s3_bucket, nil, 'S3 bucket', required: true
   option :s3_region, nil
-  option :s3_delete, nil
+  option :s3_delete, true
   option :s3_prefer_gzip, false
-  option :s3_path_style, nil
-  option :s3_reduced_redundancy_storage, nil
-  option :s3_acl, nil
-  option :s3_encryption, nil
+  option :s3_path_style, true
+  option :s3_reduced_redundancy_storage, false
+  option :s3_acl, 'public-read'
+  option :s3_encryption, false
   option :s3_prefix, nil
-  option :s3_version_bucket, nil
+  option :s3_version_bucket, false
   option :s3_index_document, nil
   option :s3_error_document, nil
   option :fastly_api_key, nil, 'Fastly API key', required: true
