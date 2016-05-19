@@ -1,10 +1,10 @@
 require 'middleman-core'
 
 class Middleman::S3Fastly < ::Middleman::Extension
-  option :aws_access_key_id, nil
-  option :aws_secret_access_key, nil
+  option :aws_access_key_id, nil, 'AWS access key ID', required: true
+  option :aws_secret_access_key, nil, 'AWS secret access key', required: true
   option :s3_caching_policies, {}
-  option :s3_bucket, nil
+  option :s3_bucket, nil, 'S3 bucket', required: true
   option :s3_region, nil
   option :s3_delete, nil
   option :s3_prefer_gzip, false
@@ -16,8 +16,8 @@ class Middleman::S3Fastly < ::Middleman::Extension
   option :s3_version_bucket, nil
   option :s3_index_document, nil
   option :s3_error_document, nil
-  option :fastly_api_key, nil
-  option :fastly_service_id, nil
+  option :fastly_api_key, nil, 'Fastly API key', required: true
+  option :fastly_service_id, nil, 'Fasly service ID', required: true
   option :fastly_purge_keys, []
   option :fastly_purge_urls, []
   option :fastly_purge_all, false
