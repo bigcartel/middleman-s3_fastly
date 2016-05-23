@@ -20,7 +20,6 @@ class Middleman::S3Fastly < ::Middleman::Extension
   option :fastly_service_id, nil, 'Fasly service ID', required: true
   option :fastly_purge_keys, []
   option :fastly_purge_urls, []
-  option :fastly_purge_all, false
 
   def initialize(app, options_hash={}, &block)
     super
@@ -80,12 +79,10 @@ class Middleman::S3Fastly < ::Middleman::Extension
   end
 
   def purge_fastly
-    if options.fastly_purge_all
-      say 'fastly', 'Purging all caches.'
+    if fastly_purge_all?
+      say 'fastly', "#{ANSI.red{'Purging'}} all caches."
       fastly_service.purge_all
     else
-      say 'fastly', 'Purging specified keys and URLs.'
-
       options.fastly_purge_keys.each do |key|
         say 'fastly', "#{ANSI.red{'Purging'}} key #{ANSI.white{key}}"
         fastly_service.purge_by_key(key)
@@ -96,6 +93,10 @@ class Middleman::S3Fastly < ::Middleman::Extension
         fastly.purge(url)
       end
     end
+  end
+
+  def fastly_purge_all?
+    options.fastly_purge_keys.blank? && options.fastly_purge_urls.blank?
   end
 
   def say(pre, message)
